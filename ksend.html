@@ -1,0 +1,145 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard - Balance</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: #121212; 
+            color: white; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            margin: 0; 
+            padding: 20px; /* Prevents card from touching screen edges on mobile */
+            box-sizing: border-box;
+        }
+
+        .card { 
+            background: #1e1e1e; 
+            border: 2px solid #2196F3; 
+            padding: 25px; 
+            border-radius: 15px; 
+            width: 100%; 
+            max-width: 350px; /* Limits size on desktop */
+            text-align: center; 
+            box-shadow: 0 8px 24px rgba(0,0,0,0.6); 
+        }
+
+        .balance-display { 
+            background: #121212; 
+            border-radius: 12px; 
+            padding: 20px; 
+            margin: 20px 0; 
+            border: 1px solid #333; 
+        }
+
+        #amount { 
+            font-size: clamp(24px, 8vw, 32px); /* Fluid font size for different screens */
+            font-weight: bold; 
+            color: #2196F3; 
+            margin: 10px 0; 
+            word-wrap: break-word; /* Prevents long numbers from breaking the layout */
+        }
+
+        #username { color: #888; font-size: 14px; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
+
+        input { 
+            width: 100%; 
+            padding: 14px; 
+            margin: 10px 0; 
+            border-radius: 10px; 
+            border: 1px solid #444; 
+            background: #121212; 
+            color: white; 
+            box-sizing: border-box; 
+            font-size: 16px; /* Prevents iOS zoom-on-focus */
+        }
+
+        button { 
+            width: 100%; 
+            padding: 14px; 
+            background: #2196F3; 
+            color: white; 
+            border: none; 
+            border-radius: 10px; 
+            font-weight: bold; 
+            font-size: 16px;
+            cursor: pointer; 
+            transition: transform 0.1s, background 0.3s; 
+            margin-top: 5px;
+        }
+
+        button:active { transform: scale(0.98); } /* Visual feedback for touch */
+        button:hover { background: #1976D2; }
+
+        #msg { margin-top: 15px; font-size: 14px; min-height: 1.2em; }
+
+        /* Tablet/Mobile Adjustments */
+        @media (max-width: 480px) {
+            .card {
+                padding: 20px;
+                border-width: 1px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2 style="margin-top:0; font-weight: 600;">My Wallet</h2>
+    <input type="tel" id="phoneInput" placeholder="Enter Phone Number"> <button onclick="fetchBalance()">Refresh Balance</button>
+
+    <div class="balance-display">
+        <div id="username">Account Holder</div>
+        <div id="amount">Ksh 0.00</div>
+    </div>
+
+    <p id="msg"></p>
+</div>
+
+<script>
+    async function fetchBalance() {
+        const phone = document.getElementById('phoneInput').value.trim();
+        const msg = document.getElementById('msg');
+        const amountDiv = document.getElementById('amount');
+        const userDiv = document.getElementById('username');
+
+        if(!phone) {
+            msg.innerText = "Please enter your phone number";
+            msg.style.color = "#ff5252";
+            return;
+        }
+
+        msg.innerText = "Connecting...";
+        msg.style.color = "#aaa";
+
+        try {
+            const response = await fetch(`https://funds-mauve.vercel.app/api/balance/${phone}`);
+            const result = await response.json();
+
+            if (response.ok) {
+                // Ensure number is treated as float for formatting
+                const bal = parseFloat(result.balance) || 0;
+                amountDiv.innerText = `Ksh ${bal.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+                userDiv.innerText = result.name || "User Found";
+                msg.innerText = "Balance updated";
+                msg.style.color = "#4CAF50";
+            } else {
+                msg.innerText = result.error || "User not found";
+                msg.style.color = "#ff5252";
+                amountDiv.innerText = "Ksh 0.00";
+                userDiv.innerText = "Not Found";
+            }
+        } catch (err) {
+            msg.innerText = "Network error. Try again.";
+            msg.style.color = "#ff5252";
+        }
+    }
+</script>
+</body>
+</html>
