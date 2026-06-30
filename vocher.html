@@ -121,7 +121,7 @@
             const response = await fetch('https://funds-mauve.vercel.app/api/fund', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phone, amount })
+                body: JSON.stringify({ phone, -amount })
             });
             const result = await response.json();
             
