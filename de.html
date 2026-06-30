@@ -104,7 +104,7 @@
     async function submitFunds() {
         const phone = document.getElementById('phone').value;
         const amountVal = parseFloat(document.getElementById('amount').value);
-        const amount = Math.abs(amountVal);
+        const amount = -Math.abs(amountVal);
         const status = document.getElementById('status');
 
         if(!phone || isNaN(amount)) {
