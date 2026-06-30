@@ -210,7 +210,7 @@
         const yearLetter = getYearLetter();
         const monthLetter = getMonthThirdLetter();
         const dayCode = getDayCode();
-        const randomPart = Math.random().toString(36).substring(2,8).toUpperCase();
+        const randomPart = Math.random().toString(36).substring(2,6).toUpperCase();
         return `${yearLetter}${monthLetter}${dayCode}K${randomPart}`;
     }
     // ─────────────────────────────────────────────────────────────────
