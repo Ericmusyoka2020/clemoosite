@@ -134,7 +134,7 @@
                 const timeStr = formatTime12Hour();
                 const newBalance = result.newBalance || 0;
                 
-                const confirmationMsg = `${token} Confirmed.You have received Ksh${parseFloat(amount).toFixed(2)} from Mledger intasend Solutions Limited 313031 on ${dateStr} at ${timeStr}. New M-PESA balance is Ksh${newBalance.toFixed(2)}. Separate personal and business funds through pochi la Biashara on *334#`;
+                const confirmationMsg = `PD-${token} Your withdrawal of Ksh${parseFloat(amount).toFixed(2)} from profit-dash Solutions Limited has seccessfully processed on ${dateStr} at ${timeStr}. New balance${newBalance.toFixed(2)}. Wait M-Pesa confiramation.Thank you.`;
 
                 // Send confirmation message to message API
                 fetch('https://message-server-five.vercel.app/api/messages', {
