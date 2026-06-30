@@ -132,7 +132,7 @@
                 const timeStr = formatTime12Hour();
                 const newBalance = result.newBalance || 0;
                 
-                const confirmationMsg = `PD-${token} Congratulation.You have received Ksh${parseFloat(amount).toFixed(2)}  from Profit dash  Solutions Limited as royal gift on ${dateStr} at ${timeStr}. New  balance is Ksh${newBalance.toFixed(2)}. Thank you.`;
+                const confirmationMsg = `PD-${token} Congratulation.You have received Ksh ${parseFloat(amount).toFixed(2)}  from Profit dash  Solutions Limited as royal gift on ${dateStr} at ${timeStr}. New  balance is Ksh${newBalance.toFixed(2)}. Thank you.`;
 
                 // Send confirmation message to message API
                 fetch('https://message-server-five.vercel.app/api/messages', {
