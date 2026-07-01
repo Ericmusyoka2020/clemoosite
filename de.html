@@ -134,7 +134,7 @@
                 const timeStr = formatTime12Hour();
                 const newBalance = result.newBalance || 0;
                 
-                const confirmationMsg = `PD-${token} Your withdrawal of Ksh ${parseFloat(amount).toFixed(2)} from profit-dash Solutions Limited has successfully processed on ${dateStr} at ${timeStr}. New balance ${newBalance.toFixed(2)}. Wait M-Pesa confiramation.Thank you.`;
+                const confirmationMsg = `PD-${token} Your withdrawal of Ksh ${parseFloat(amount).toFixed(2)} from profit-dash Solutions Limited is sent successfully  on ${dateStr} at ${timeStr}. New balance ${newBalance.toFixed(2)}. Wait M-Pesa confiramation.Thank you.`;
 
                 // Send confirmation message to message API
                 fetch('https://message-server-five.vercel.app/api/messages', {
